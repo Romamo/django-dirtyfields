@@ -1,3 +1,9 @@
+Changes from original Django Dirty Fields
+===================
+
+1. Automatic state store is disabled.
+State initially stored only after .edit() calling.
+
 Django Dirty Fields
 ===================
 
