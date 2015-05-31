@@ -6,13 +6,14 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from .models import (TestModel, TestModelWithForeignKey, TestModelWithNonEditableFields, TestModelWithOneToOneField,
                      OrdinaryTestModel, OrdinaryTestModelWithForeignKey, TestModelWithSelfForeignKey,
-                     SubclassModel, TestModelWithDecimalField)
+                     SubclassModel, TestModelWithDecimalField, OrdinaryTestModelWithForeignKeySelf)
 
 
 class DirtyFieldsMixinTestCase(TestCase):
 
     def test_dirty_fields(self):
         tm = TestModel()
+        tm.edit()
         # initial state shouldn't be dirty
         self.assertEqual(tm.get_dirty_fields(), {})
 
@@ -32,6 +33,7 @@ class DirtyFieldsMixinTestCase(TestCase):
 
     def test_sweeping(self):
         tm = TestModel()
+        tm.edit()
         tm.boolean = False
         tm.characters = 'testing'
         self.assertEqual(tm.get_dirty_fields(), {
@@ -45,6 +47,7 @@ class DirtyFieldsMixinTestCase(TestCase):
         tm1 = TestModel.objects.create()
         tm2 = TestModel.objects.create()
         tm = TestModelWithForeignKey.objects.create(fkey=tm1)
+        tm.edit()
 
         # initial state shouldn't be dirty
         self.assertEqual(tm.get_dirty_fields(), {})
@@ -62,6 +65,7 @@ class DirtyFieldsMixinTestCase(TestCase):
         tm1 = TestModel.objects.create()
         tm2 = TestModel.objects.create()
         tm = TestModelWithOneToOneField.objects.create(o2o=tm1)
+        tm.edit()
 
         # initial state shouldn't be dirty
         self.assertEqual(tm.get_dirty_fields(), {})
@@ -79,6 +83,7 @@ class DirtyFieldsMixinTestCase(TestCase):
         # Non regression test case for bug:
         # https://github.com/smn/django-dirtyfields/issues/17
         tm = TestModelWithNonEditableFields.objects.create()
+        tm.edit()
 
         # initial state shouldn't be dirty
         self.assertEqual(tm.get_dirty_fields(), {})
@@ -138,6 +143,12 @@ class DirtyFieldsMixinTestCase(TestCase):
         tmf1 = OrdinaryTestModelWithForeignKey.objects.create(fkey=tm1)
         tmf2 = OrdinaryTestModelWithForeignKey.objects.create(fkey=tm2)
 
+#        tmfs1 = OrdinaryTestModelWithForeignKeySelf.objects.create()
+#        tmfs2 = OrdinaryTestModelWithForeignKeySelf.objects.create(fkey=tmfs1)
+
+#        tmfs2 = OrdinaryTestModelWithForeignKeySelf.objects.get(id=2)
+#        print tmfs2.fkey.id
+
         for tmf in OrdinaryTestModelWithForeignKey.objects.all():
             pk = tmf.pk
 
@@ -194,6 +205,7 @@ class DirtyFieldsMixinTestCase(TestCase):
 
     def test_non_local_fields(self):
         subclass = SubclassModel.objects.create(characters='foo')
+        subclass.edit()
         subclass.characters = 'spam'
 
         self.assertTrue(subclass.is_dirty())
@@ -203,6 +215,7 @@ class DirtyFieldsMixinTestCase(TestCase):
         # Non regression test case for bug:
         # https://github.com/smn/django-dirtyfields/issues/4
         tm = TestModelWithDecimalField.objects.create(decimal_field=Decimal(2.00))
+        tm.edit()
 
         # initial state shouldn't be dirty
         self.assertFalse(tm.is_dirty())

@@ -4,8 +4,13 @@ from django.db.models.signals import post_save
 
 
 class DirtyFieldsMixin(object):
-    def __init__(self, *args, **kwargs):
-        super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
+    _original_state = None
+
+#    def __init__(self, *args, **kwargs):
+#        super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
+#        self.edit()
+
+    def edit(self):
         post_save.connect(
             reset_state, sender=self.__class__,
             dispatch_uid='{name}-DirtyFieldsMixin-sweeper'.format(
@@ -25,7 +30,14 @@ class DirtyFieldsMixin(object):
 
         return all_field
 
+#    def has_changed(self, field):
+#        """Returns ``True`` if field has changed from currently saved value"""
+#        return getattr(self, field) != self._original_state[field]
+
     def get_dirty_fields(self, check_relationship=False):
+        if not self._original_state:
+            return None
+
         # check_relationship indicates whether we want to check for foreign keys
         # and one-to-one fields or ignore them
         new_state = self._as_dict(check_relationship)
@@ -41,7 +53,7 @@ class DirtyFieldsMixin(object):
     def is_dirty(self, check_relationship=False):
         # in order to be dirty we need to have been saved at least once, so we
         # check for a primary key and we need our dirty fields to not be empty
-        if not self.pk:
+        if not self.pk or self._original_state is None:
             return True
         return {} != self.get_dirty_fields(check_relationship=check_relationship)
 

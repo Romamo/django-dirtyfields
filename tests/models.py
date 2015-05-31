@@ -40,5 +40,9 @@ class OrdinaryTestModelWithForeignKey(models.Model):
     fkey = models.ForeignKey(OrdinaryTestModel)
 
 
+class OrdinaryTestModelWithForeignKeySelf(models.Model):
+    fkey = models.ForeignKey("OrdinaryTestModelWithForeignKeySelf", null=True)
+
+
 class SubclassModel(TestModel):
     pass
