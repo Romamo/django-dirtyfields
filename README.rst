@@ -1,8 +1,8 @@
 Changes from original Django Dirty Fields
 ===================
 
-1. Automatic state store is disabled.
-State initially stored only after .edit() calling.
+1. Added lazy dirtyfields as LazyDirtyFieldsMixin
+Call .start_dirty() to reset dirty fields
 
 Django Dirty Fields
 ===================
