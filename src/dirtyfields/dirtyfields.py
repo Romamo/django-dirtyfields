@@ -6,11 +6,11 @@ from django.db.models.signals import post_save
 class DirtyFieldsMixin(object):
     _original_state = None
 
-#    def __init__(self, *args, **kwargs):
-#        super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
-#        self.edit()
+    def __init__(self, *args, **kwargs):
+        super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
+        self.start_dirty()
 
-    def edit(self):
+    def start_dirty(self):
         post_save.connect(
             reset_state, sender=self.__class__,
             dispatch_uid='{name}-DirtyFieldsMixin-sweeper'.format(
@@ -36,7 +36,7 @@ class DirtyFieldsMixin(object):
 
     def get_dirty_fields(self, check_relationship=False):
         if not self._original_state:
-            return None
+            return {}
 
         # check_relationship indicates whether we want to check for foreign keys
         # and one-to-one fields or ignore them
@@ -62,3 +62,8 @@ def reset_state(sender, instance, **kwargs):
     # original state should hold all possible dirty fields to avoid
     # getting a `KeyError` when checking if a field is dirty or not
     instance._original_state = instance._as_dict(check_relationship=True)
+
+
+class LazyDirtyFieldsMixin(DirtyFieldsMixin):
+   def __init__(self, *args, **kwargs):
+       super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
