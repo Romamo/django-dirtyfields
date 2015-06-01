@@ -6,7 +6,7 @@ def listify(filename):
 setup(
     name = "django-dirtyfields",
     version = "2.0",
-    url = 'http://github.com/smn/django-dirtyfields',
+    url = 'http://github.com/Romamo/django-dirtyfields',
     license = 'BSD',
     description = "Tracking dirty fields on a Django model instance",
     long_description = open('README.rst','r').read(),
